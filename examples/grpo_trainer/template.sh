@@ -1,0 +1,80 @@
+set -x
+
+export TOKENIZERS_PARALLELISM=true
+export RAY_DEBUG=legacy
+
+model_path="${MODEL_PATH:-}"
+project_name="${PROJECT_NAME:-string-task}"
+experiment_name="${EXPERIMENT_NAME:-}"
+train_files="${TRAIN_FILES:-['data/string_task/stage2_level1/train.parquet']}"
+val_files="${VAL_FILES:-['data/string_task/stage2_level18/test.parquet']}"
+nnodes="${NNODES:-1}"
+save_dir="${SAVE_DIR:-checkpoints}"
+
+bsz=16
+prompt_length=1024
+response_length=8192
+mbsz=16
+n=16
+
+enable_filter_groups=True
+filter_groups_metric=seq_reward
+max_num_gen_batches=10
+gen_prompt_bsz=$((bsz * 2))
+
+python3 -m verl.trainer.main_ppo \
+    algorithm.adv_estimator=grpo \
+    data.train_files=${train_files} \
+    data.val_files=${val_files} \
+    data.train_batch_size=$bsz \
+    data.max_prompt_length=$prompt_length \
+    data.max_response_length=$response_length \
+    data.gen_batch_size=${gen_prompt_bsz} \
+    data.filter_overlong_prompts=True \
+    data.truncation='error' \
+    actor_rollout_ref.model.path=${model_path} \
+    actor_rollout_ref.actor.optim.lr=1e-6 \
+    actor_rollout_ref.actor.clip_ratio_low=0.2 \
+    actor_rollout_ref.actor.clip_ratio_high=0.2 \
+    actor_rollout_ref.actor.use_token_level_loss=True \
+    actor_rollout_ref.actor.use_dynamic_bsz=True \
+    actor_rollout_ref.actor.ppo_max_token_len_per_gpu=17408 \
+    actor_rollout_ref.model.use_remove_padding=True \
+    actor_rollout_ref.actor.ppo_mini_batch_size=$mbsz \
+    actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=1 \
+    actor_rollout_ref.actor.use_kl_loss=False \
+    actor_rollout_ref.actor.kl_loss_coef=0 \
+    actor_rollout_ref.actor.kl_loss_type=low_var_kl \
+    actor_rollout_ref.model.enable_gradient_checkpointing=True \
+    actor_rollout_ref.actor.fsdp_config.param_offload=True \
+    actor_rollout_ref.actor.fsdp_config.optimizer_offload=True \
+    actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=32 \
+    actor_rollout_ref.rollout.tensor_model_parallel_size=1 \
+    actor_rollout_ref.rollout.name=vllm \
+    actor_rollout_ref.rollout.gpu_memory_utilization=0.8 \
+    actor_rollout_ref.rollout.n=$n \
+    actor_rollout_ref.rollout.enforce_eager=False \
+    actor_rollout_ref.rollout.free_cache_engine=False \
+    actor_rollout_ref.rollout.log_prob_use_dynamic_bsz=True \
+    actor_rollout_ref.rollout.log_prob_max_token_len_per_gpu=34816 \
+    actor_rollout_ref.rollout.temperature=1.0 \
+    actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu=32 \
+    actor_rollout_ref.ref.fsdp_config.param_offload=True \
+    actor_rollout_ref.ref.log_prob_use_dynamic_bsz=True \
+    actor_rollout_ref.ref.log_prob_max_token_len_per_gpu=34816 \
+    algorithm.kl_ctrl.kl_coef=0 \
+    algorithm.filter_groups.enable=${enable_filter_groups} \
+    algorithm.filter_groups.max_num_gen_batches=${max_num_gen_batches} \
+    algorithm.filter_groups.metric=${filter_groups_metric} \
+    reward_model.reward_manager="mp" \
+    reward_model.penalize_overlong=True \
+    trainer.critic_warmup=0 \
+    trainer.logger=['console','wandb'] \
+    trainer.project_name=${project_name} \
+    trainer.experiment_name=${experiment_name} \
+    trainer.n_gpus_per_node=8 \
+    trainer.nnodes=1 \
+    trainer.save_freq=25 \
+    trainer.test_freq=25 \
+    trainer.default_local_dir=${save_dir} \
+    trainer.total_epochs=1 $@

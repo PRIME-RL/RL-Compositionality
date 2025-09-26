@@ -1,5 +1,4 @@
 <div align="center">
-![comic](https://github.com/user-attachments/assets/1cf8bbce-6454-4731-acfa-21fd4a331cd9)
 
 # From $f(x)$ and $g(x)$ to $f(g(x))$: LLMs Learn New Skills in RL by Composing Old Ones
 

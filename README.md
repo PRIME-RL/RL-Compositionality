@@ -2,7 +2,7 @@
 
 # From $f(x)$ and $g(x)$ to $f(g(x))$: LLMs Learn New Skills in RL by Composing Old Ones
 
-[![Notion](https://img.shields.io/badge/Notion-%23000000.svg?style=for-the-badge&logo=notion&logoColor=white)](https://husky-morocco-f72.notion.site/From-f-x-and-g-x-to-f-g-x-LLMs-Learn-New-Skills-in-RL-by-Composing-Old-Ones-2499aba4486f802c8108e76a12af3020)  [![Github](https://img.shields.io/badge/GitHub-000000?style=for-the-badge&logo=github&logoColor=000&logoColor=white)](https://github.com/PRIME-RL/RL-Compositionality) [![Twitter](https://img.shields.io/badge/Twitter-%23000000.svg?style=for-the-badge&logo=twitter&logoColor=white)](https://x.com/lifan__yuan/status/1963662222602723673)
+[![Paper](https://img.shields.io/badge/Paper-A42C25?style=for-the-badge&logo=arxiv&logoColor=white)](https://arxiv.org/abs/2509.25123) [![Notion](https://img.shields.io/badge/Notion-%23000000.svg?style=for-the-badge&logo=notion&logoColor=white)](https://husky-morocco-f72.notion.site/From-f-x-and-g-x-to-f-g-x-LLMs-Learn-New-Skills-in-RL-by-Composing-Old-Ones-2499aba4486f802c8108e76a12af3020)  [![Github](https://img.shields.io/badge/GitHub-000000?style=for-the-badge&logo=github&logoColor=000&logoColor=white)](https://github.com/PRIME-RL/RL-Compositionality) [![Twitter](https://img.shields.io/badge/Twitter-%23000000.svg?style=for-the-badge&logo=twitter&logoColor=white)](https://x.com/lifan__yuan/status/1963662222602723673)
 </div>
 
 📘 This repository contains the code accompanying the paper **"FROM $f(x)$ AND $g(x)$ TO $f(g(x))$: LLMs Learn New Skills in RL by Composing Old Ones"**. The repo is built upon [veRL](https://github.com/volcengine/verl), and we provide the synthetic data generators and training pipelines required to reproduce results reported in the paper.
@@ -184,12 +184,11 @@ The Stage 2 training is the same as Section 4.1/4.2. You can reuse the scripts a
 If you build upon this work, please cite the accompanying paper:
 
 ```bibtex
-@misc{yuan2025llms,
-  author       = {Lifan Yuan and Weize Chen and Yuchen Zhang and Ganqu Cui and Hanbin Wang and Ziming You and Ning Ding and Zhiyuan Liu and Maosong Sun and Hao Peng},
-  title        = {From $f(x)$ and $g(x)$ to $f(g(x))$: {LLMs} Learn New Skills in {RL} by Composing Old Ones},
-  year         = {2025},
-  note         = {Notion blog post, available online},
-  howpublished = {\url{https://husky-morocco-f72.notion.site/From-f-x-and-g-x-to-f-g-x-LLMs-Learn-New-Skills-in-RL-by-Composing-Old-Ones-2499aba4486f802c8108e76a12af3020}},
+@article{yuan2025rlcompose,
+  author    = {Lifan Yuan and Weize Chen and Yuchen Zhang and Ganqu Cui and Hanbin Wang and Ziming You and Ning Ding and Zhiyuan Liu and Maosong Sun and Hao Peng},
+  title     = {From $f(x)$ and $g(x)$ to $f(g(x))$: {LLMs} Learn New Skills in {RL} by Composing Old Ones},
+  journal   = {arXiv preprint arXiv:2509.25123},
+  year      = {2025},
+  url       = {https://arxiv.org/abs/2509.25123}
 }
 ```
-

@@ -2,7 +2,7 @@
 
 # From f(x) and g(x) to f(g(x)): LLMs Learn New Skills in RL by Composing Old Ones
 
-[![Paper](https://img.shields.io/badge/Paper-A42C25?style=for-the-badge&logo=arxiv&logoColor=white)](https://arxiv.org/abs/2509.25123) [![Notion](https://img.shields.io/badge/Notion-%23000000.svg?style=for-the-badge&logo=notion&logoColor=white)](https://husky-morocco-f72.notion.site/From-f-x-and-g-x-to-f-g-x-LLMs-Learn-New-Skills-in-RL-by-Composing-Old-Ones-2499aba4486f802c8108e76a12af3020)  [![Github](https://img.shields.io/badge/GitHub-000000?style=for-the-badge&logo=github&logoColor=000&logoColor=white)](https://github.com/PRIME-RL/RL-Compositionality) [![Twitter](https://img.shields.io/badge/Twitter-%23000000.svg?style=for-the-badge&logo=twitter&logoColor=white)](https://x.com/lifan__yuan/status/1963662222602723673)
+[![Paper](https://img.shields.io/badge/Paper-A42C25?style=for-the-badge&logo=arxiv&logoColor=white)](https://arxiv.org/abs/2509.25123) [![Notion](https://img.shields.io/badge/Notion-%23000000.svg?style=for-the-badge&logo=notion&logoColor=white)](https://husky-morocco-f72.notion.site/From-f-x-and-g-x-to-f-g-x-LLMs-Learn-New-Skills-in-RL-by-Composing-Old-Ones-2499aba4486f802c8108e76a12af3020) [![Hugging Face Collection](https://img.shields.io/badge/Dataset-fcd022?style=for-the-badge&logo=huggingface&logoColor=000)](https://huggingface.co/collections/weizechen/rl-compositionality-68f2391946d9a68ae279aceb) [![Github](https://img.shields.io/badge/GitHub-000000?style=for-the-badge&logo=github&logoColor=000&logoColor=white)](https://github.com/PRIME-RL/RL-Compositionality) [![Twitter](https://img.shields.io/badge/Twitter-%23000000.svg?style=for-the-badge&logo=twitter&logoColor=white)](https://x.com/lifan__yuan/status/1963662222602723673)
 </div>
 
 📘 This repository contains the code accompanying the paper **"FROM $f(x)$ AND $g(x)$ TO $f(g(x))$: LLMs Learn New Skills in RL by Composing Old Ones"**. The repo is built upon [veRL](https://github.com/volcengine/verl), and we provide the synthetic data generators and training pipelines required to reproduce results reported in the paper.
@@ -67,6 +67,14 @@
 
 Stage 1 corresponds to rejection fine-tuning (RFT) on tasks where the function definitions are visible. The process produces a Stage 1 checkpoint that serves as the initialization for all Stage 2 experiments.
 
+You can directly download our [Stage-1 RFT training data](https://huggingface.co/datasets/weizechen/RL-Compositionality-Stage1-RFT-Data) on 🤗Huggingface. 
+```bash
+hf download --repo-type dataset --local-dir data/string_task/stage1_level1/rft_data weizechen/RL-Compositionality-Stage1-RFT-Data
+```
+
+<details>
+<summary>Alternatively, you can create the problems and collect the RFT data by yourself</summary>
+  
 1. **Generate synthetic training data**
 
    ```bash
@@ -82,15 +90,14 @@ Stage 1 corresponds to rejection fine-tuning (RFT) on tasks where the function d
    ```
 
    The script samples `N_SAMPLES` responses per prompt and stores them in `data/string_task/stage1_level1/rollout.parquet`. And then filters the rollouts based on the accuracy and emits `train.parquet` / `test.parquet` splits under `data/string_task/stage1_level1/rft_data/`.
+</details>
 
+Then train the `Llama 3.1 8B Instruct` model with the RFT data:
+```bash
+bash bash/section41_42/stage1_rft.sh
+```
 
-3. **Train the Stage 1 RFT model**
-
-   ```bash
-   bash bash/section41_42/stage1_rft.sh
-   ```
-
-   The resulting checkpoint is saved to `checkpoints/string-task/stage1-rft/` and initializes every Stage 2 run.
+The resulting checkpoint is saved to `checkpoints/string-task/stage1-rft/` and initializes every Stage 2 run.
 
 ---
 
@@ -101,21 +108,35 @@ Stage 2 removes access to function implementations and focuses on compositional 
 
 ### 🤖 RL Variants (Sections 4.1 & 4.2)
 
-1. **Create compositional problem sets**
+Download the RL training and evaluation dataset from 🤗Huggingface
+
+```bash
+# Training
+hf download --repo-type dataset --local-dir data/string_task/stage2_level1 weizechen/RL-Compositionality-Stage2-RL-Level1-TrainData
+hf download --repo-type dataset --local-dir data/string_task/stage2_level2 weizechen/RL-Compositionality-Stage2-RL-Level2-TrainData
+
+# Evaluation
+hf download --repo-type dataset --local-dir data/string_task/stage2_level1to8 weizechen/RL-Compositionality-Stage2-RL-Level2-TestData
+```
+
+<details>
+<summary>Alternatively, you can create the problems yourself</summary>
 
    ```bash
    bash bash/section41_42/stage2_create_problems.sh
    ```
 
-   ➡️ Generates Level-1, Level-2, Level-1-to-2 training splits and a Level-1-to-8 evaluation split.
+   ➡️ Generates Level-1, Level-2 training splits and a Level-1-to-8 evaluation split.
 
-2. **Launch RL training with your desired setting**:
+</details>
 
-   ```bash
-   bash bash/section41_42/stage2_rl_level1.sh      # Level-1 only
-   bash bash/section41_42/stage2_rl_level2.sh      # Level-2 only
-   bash bash/section41_42/stage2_rl_level1to2.sh   # Mixed Level-1+2
-   ```
+Launch RL training with your desired setting:
+
+```bash
+bash bash/section41_42/stage2_rl_level1.sh      # Level-1 only
+bash bash/section41_42/stage2_rl_level2.sh      # Level-2 only
+bash bash/section41_42/stage2_rl_level1to2.sh   # Mixed Level-1+2
+```
 
 ### 📊 RFT Baseline (Section 4.2)
 
